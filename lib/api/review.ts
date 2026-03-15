@@ -7,17 +7,29 @@ export interface ReviewSummary {
   message?: string
 }
 
+async function readReviewResponse(res: Response): Promise<ReviewSummary> {
+  const raw = await res.text()
+
+  try {
+    return JSON.parse(raw) as ReviewSummary
+  } catch {
+    throw new Error(`Review API returned non-JSON response (status ${res.status})`)
+  }
+}
+
 export async function getProductReviewSummary(productId: number): Promise<ReviewSummary> {
   const res = await fetch(`/api/reviews/${productId}`, {
     method: "GET",
     cache: "no-store",
   })
 
+  const data = await readReviewResponse(res)
+
   if (!res.ok) {
-    throw new Error("Failed to load reviews")
+    throw new Error(data.message || "Failed to load reviews")
   }
 
-  return res.json()
+  return data
 }
 
 export async function submitProductReview(productId: number, stars: number): Promise<ReviewSummary> {
@@ -29,7 +41,7 @@ export async function submitProductReview(productId: number, stars: number): Pro
     body: JSON.stringify({ stars }),
   })
 
-  const data = (await res.json()) as ReviewSummary
+  const data = await readReviewResponse(res)
 
   if (!res.ok) {
     throw new Error(data.message || "Failed to submit review")

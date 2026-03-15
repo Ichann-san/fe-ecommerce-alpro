@@ -10,34 +10,54 @@ export interface StoredReviewBucket {
 
 export type ReviewStore = Record<string, StoredReviewBucket>
 
-const REVIEW_FILE = path.join(process.cwd(), "data", "reviews.json")
+const REVIEW_FILE = process.env.VERCEL
+  ? path.join("/tmp", "alproshop-reviews.json")
+  : path.join(process.cwd(), "data", "reviews.json")
+
+let memoryStore: ReviewStore = {}
 
 async function ensureReviewFile() {
-  const dir = path.dirname(REVIEW_FILE)
-  await fs.mkdir(dir, { recursive: true })
-
   try {
+    const dir = path.dirname(REVIEW_FILE)
+    await fs.mkdir(dir, { recursive: true })
+
     await fs.access(REVIEW_FILE)
+    return true
   } catch {
-    await fs.writeFile(REVIEW_FILE, "{}", "utf-8")
+    try {
+      await fs.writeFile(REVIEW_FILE, "{}", "utf-8")
+      return true
+    } catch {
+      return false
+    }
   }
 }
 
 export async function readReviewStore(): Promise<ReviewStore> {
-  await ensureReviewFile()
+  const canUseFile = await ensureReviewFile()
+  if (!canUseFile) return memoryStore
 
   try {
     const raw = await fs.readFile(REVIEW_FILE, "utf-8")
     const parsed = JSON.parse(raw) as ReviewStore
-    return parsed ?? {}
+    memoryStore = parsed ?? {}
+    return memoryStore
   } catch {
-    return {}
+    return memoryStore
   }
 }
 
 export async function writeReviewStore(store: ReviewStore) {
-  await ensureReviewFile()
-  await fs.writeFile(REVIEW_FILE, JSON.stringify(store, null, 2), "utf-8")
+  memoryStore = store
+
+  const canUseFile = await ensureReviewFile()
+  if (!canUseFile) return
+
+  try {
+    await fs.writeFile(REVIEW_FILE, JSON.stringify(store, null, 2), "utf-8")
+  } catch {
+    // Keep memory fallback when persistent write fails.
+  }
 }
 
 export function buildReviewerId(ip: string, userAgent: string) {
