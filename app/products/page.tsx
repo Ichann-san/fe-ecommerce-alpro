@@ -1,11 +1,12 @@
 "use client"
 
+import { Suspense } from "react"
 import { useProducts } from "@/hooks/useProducts"
 import { ProductCard } from "@/components/product/ProductCard"
 import { ProductCardSkeleton } from "@/components/product/ProductCardSkeleton"
 import { useSearchParams } from "next/navigation"
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get("category")
   const { data, isLoading } = useProducts(selectedCategory ?? undefined)
@@ -71,5 +72,38 @@ export default function ProductsPage() {
         ))}
       </div>
     </div>
+  )
+}
+
+function ProductsPageFallback() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-black tracking-tight text-gray-900">Products</h1>
+        <p className="mt-2 text-sm text-gray-600">Loading curated items...</p>
+      </div>
+
+      <div
+        className="
+        grid
+        grid-cols-1
+        sm:grid-cols-2
+        lg:grid-cols-4
+        gap-6
+        "
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsPageFallback />}>
+      <ProductsPageContent />
+    </Suspense>
   )
 }
