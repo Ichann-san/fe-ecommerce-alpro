@@ -8,7 +8,7 @@ export const products: Product[] = [
     category: "wearables",
     image: "/products/1.png",
     description: "Simple cotton t-shirt",
-    rating: { rate: 4.5, count: 120 },
+    rating: { rate: 4.5, count: 10 },
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ export const products: Product[] = [
     category: "mouse",
     image: "/products/2.png",
     description: "Comfortable running shoes",
-    rating: { rate: 4.8, count: 250 },
+    rating: { rate: 4.8, count: 3 },
   },
     {
     id: 3,
@@ -26,7 +26,7 @@ export const products: Product[] = [
     category: "wearables",
     image: "/products/3.png",
     description: "Simple cotton t-shirt",
-    rating: { rate: 4.5, count: 120 },
+    rating: { rate: 4.5, count: 5 },
   },
     {
     id: 4,
@@ -35,6 +35,6 @@ export const products: Product[] = [
     category: "laptop",
     image: "/products/4.png",
     description: "Simple cotton t-shirt",
-    rating: { rate: 4.5, count: 120 },
+    rating: { rate: 4.5, count: 12 },
   },
 ]
